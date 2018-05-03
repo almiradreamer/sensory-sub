@@ -1,6 +1,6 @@
 # sensory-sub
 
-Controlling LEDs using Arduino Serial Port
+Controlling 14-Segment electrode using Arduino Serial Port
 
 Requirement:
 - python 3

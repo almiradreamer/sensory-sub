@@ -1,10 +1,20 @@
-import tkinter as tk
+"""
+This script is main application script. It configures connection with a controller over serial, sets up GUI
+and manages data exchange between controller and program interface.
 
+"""
+
+import tkinter as tk
 import connection_frame  as connection_frame
 
 
 class Main:
     def __init__(self):
+        """The initialization of a program
+
+        Define global program variables.
+
+        """
         self.serial = None
         self.top = tk.Tk()
         self.checks = []
@@ -140,60 +150,130 @@ class Main:
             0b0011111111111111]
 
     def start(self):
+        """The starting point of a program
+
+        Set up program interface.
+
+        :return:
+        """
         connection_frame.Connection(self).draw()
         self.top.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.top.mainloop()
 
     def on_closing(self):
+        """Define behaviour when application is closed
+
+        Cut off connection over serial and close application interface.
+
+        :return:
+        """
         if self.serial is not None:
             self.serial.close()
         self.top.destroy()
 
     def get_frame(self):
+        """Get main application frame
+
+        :return: Tk Widget
+            Main window of an application
+        """
         return self.top
 
     def on_connect(self, ser, model):
+        """Define behaviour when user is trying to connect to a serial port
+
+        Set the desired port to a global variable
+        Convert characters of a model to an integers according to mapping array.
+
+        :param ser: The desired port for connection
+        :param model: A string to be sent over serial
+        :return:
+        """
         self.serial = ser
-        print('Im trying', len(model))
         for i in range(len(model)):
             bitarray = self.alphabet[ord(model[i])]
-            print(bitarray)
             self.serial.write(bitarray)
-            print(self.serial.readString())
             self.serial.flush()
 
     def update_model(self, model):
+        """Update model of transferred data and send it over serial
+
+        Convert characters of a model to an integers according to mapping array.
+
+        :param model: A string to be sent over serial
+        :return:
+        """
         for i in range(len(model)):
             bitarray = self.alphabet[ord(model[i])]
-            print(bitarray)
-            print(str(bitarray).upper())
             self.serial.write(str(bitarray).upper().encode("utf-8"))
 
     def update_frequency(self, freq, duty):
+        """Send new electrical parameters over serial
+
+        :param freq:
+        :param duty:
+        :return:
+        """
         msg = "f" + str(freq) + "d" + str(duty)
         self.serial.write(msg.encode("utf-8"))
 
     def select(self, i):
+        """Select particular segment to be turned on
+
+        N.B. This is for working with 3x3 electrode
+
+        :param i: the index of a segment
+        :return:
+        """
         self.serial.write(("+" + str(i)).encode("utf-8"))
         self.serial.flush()
         self.checks[i][0].select()
 
     def deselect(self, i):
+        """Select particular segment to be turned off
+
+        N.B. This is for working with 3x3 electrode
+
+        :param i: the index of a segment
+        :return:
+        """
         self.serial.write(("-" + str(i)).encode("utf-8"))
         self.serial.flush()
         self.checks[i][0].deselect()
 
     def state(self, i):
+        """Get the state of a particular segment
+
+        N.B. This is for working with 3x3 electrode
+
+        :param i: the index of a segment
+        :return: the binary value indicating if a particular segment is on
+        """
         return self.checks[i][1].get()
 
     def toggle(self, i):
+        """Change the state of a particular segment
+
+        N.B. This is for working with 3x3 electrode
+
+        :param i: the index of a segment
+        :return:
+        """
         if self.state(i) == 1:
             self.deselect(i)
         else:
             self.select(i)
 
-
 def checkbox_changed(port, var, ser):
+    """Send updated information about enabling particular port over serial
+
+    N.B. This is for working with 3x3 electrode
+
+    :param port: index of a port
+    :param var: binary value indicating the desired state of a port
+    :param ser: the serial over which to send the data
+    :return:
+    """
     def f():
         to_send = "-"
         if var.get() == 1:

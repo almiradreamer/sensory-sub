@@ -28,7 +28,6 @@ void loop() {
             for (int i = 13; i >= 0; i--) {
               if (bitRead(flag, i) == 1) {
                   digitalWrite(i + start_pin, HIGH);
-          
                } else {
                   digitalWrite(i + start_pin, LOW);
                }

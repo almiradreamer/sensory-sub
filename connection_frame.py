@@ -1,3 +1,8 @@
+"""
+This script draws application interface and manages user manipulations with it.
+
+"""
+
 import tkinter as tk
 import subprocess
 import serial
@@ -6,6 +11,11 @@ from PIL import Image, ImageFont, ImageDraw, ImageTk
 
 class Connection:
     def __init__(self, parent):
+        """The initialization of a program
+
+        Define global program variables.
+
+        """
         self.parent = parent
         parent_frame = self.parent.get_frame()
         self.text_frame = tk.Frame(parent_frame)
@@ -32,6 +42,12 @@ class Connection:
         self.font14 = ImageFont.truetype('Segment14.otf', 64)
 
     def draw(self):
+        """Draw application interface
+
+        Draw initial state of Connection Frame, Text Transfer Frame and Electrical Parameters Frame
+
+        :return:
+        """
 
         self.text_transfer.delete(0, tk.END)
         tk.Label(self.text_frame, text="Letters to send: ").grid(row=1)
@@ -63,6 +79,13 @@ class Connection:
         change_freq_button.grid(column=2)
 
     def send_text(self):
+        """Handle a text submitted by a user
+
+        Send a string from user input to the top frame to handle further transfer to a controller.
+        Draw a preview of a text using 14-segment font.
+
+        :return:
+        """
         def f():
             text = self.text_transfer.get()
             width, height = self.font14.getsize(text)
@@ -78,6 +101,12 @@ class Connection:
         return f
 
     def set_frequency(self):
+        """Handle a new electrical parameters submitted by a user
+
+        Send new frequency and duty ration from user input to the top frame to handle further transfer to a controller.
+
+        :return:
+        """
         def f():
             freq = float(self.freq_edit.get())
             duty = float(self.duty_edit.get())
@@ -86,10 +115,15 @@ class Connection:
             if duty > 1:
                 duty = duty / 100
             self.parent.update_frequency(freq, duty)
-            print("someone wanna change freq and duty " + str(freq) + ' ' + str(duty))
         return f
 
     def connect(self):
+        """Handle the connection button
+
+        Define a serial over which program is connected to the desired by a user port
+
+        :return:
+        """
         def f():
             com_port = self.ports_listbox.get(tk.ACTIVE)
             ser = serial.Serial(com_port)
@@ -101,16 +135,28 @@ class Connection:
         return f
 
     def checkbox_changed(self, i, j, var):
+        """Handle a new checkbox submitted by a user
+
+        N.B. This is for working with 3x3 electrode
+
+        :param i: the index of a row of the checkbox
+        :param j: the index of a column of the checkbox
+        :param var: the binary value indicating the new value for the segment
+        :return:
+        """
         def f():
             self.model[i][j] = var.get()
-
         return f
 
 
 def get_available_serials():
+    """Get available for connection ports
+
+    :return: List of available ports
+    """
     ports_string = subprocess.check_output(['python3', '-m', 'serial.tools.list_ports']).decode("utf-8").strip()
     print("FOUND: " + ports_string)
-    if len(ports_string) == 0:  # TODO: REMOVE ME: stub to debug without any ports
+    if len(ports_string) == 0:
         print("stubs used as no ports found")
         return ["/dev/ttyUSB0", "/dev/ttyUSB1"]
     return ports_string.split('\n')
