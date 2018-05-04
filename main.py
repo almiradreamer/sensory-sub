@@ -6,6 +6,7 @@ and manages data exchange between controller and program interface.
 
 import tkinter as tk
 import connection_frame  as connection_frame
+import time
 
 
 class Main:
@@ -205,17 +206,18 @@ class Main:
         """
         for i in range(len(model)):
             bitarray = self.alphabet[ord(model[i])]
-            self.serial.write(str(bitarray).upper().encode("utf-8"))
+            self.serial.write(str(bitarray).encode("utf-8"))
 
-    def update_frequency(self, freq, duty):
+    def update_frequency(self, freq, duty, model):
         """Send new electrical parameters over serial
 
         :param freq:
         :param duty:
         :return:
         """
-        msg = "f" + str(freq) + "d" + str(duty)
+        msg = "f" + str(freq) + "d" + str(duty) + "m" + str(self.alphabet[ord(model)])
         self.serial.write(msg.encode("utf-8"))
+
 
     def select(self, i):
         """Select particular segment to be turned on

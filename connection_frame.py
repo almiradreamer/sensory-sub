@@ -90,15 +90,9 @@ class Connection:
         def f():
             self.highlight_input()
             text = self.text_transfer.get()[self.counter]
-            width, height = self.font14.getsize(text)
-            image = Image.new("RGBA", (width, height), color=(0, 0, 0, 0))
-            draw = ImageDraw.Draw(image)
-            draw.text((0, 0), text, font=self.font14, fill="black")
-            self._photoimage = ImageTk.PhotoImage(image)
-            self.model_image.config(image=self._photoimage)
             self.model = text
+            # print("yep")
             self.parent.update_model(self.model.upper())
-            tk.Label(self.model_frame, text="Preview: ").grid(row=0, column=0)
             print(self.model)
         return f
 
@@ -141,6 +135,13 @@ class Connection:
             text = text[:self.counter] + text[self.counter].upper() + text[self.counter + 1:]
             self.text_transfer.delete(0, tk.END)
             self.text_transfer.insert(0, text)
+            tk.Label(self.model_frame, text="Preview: ").grid(row=0, column=0)
+            width, height = self.font14.getsize(text[self.counter].upper())
+            image = Image.new("RGBA", (width, height), color=(0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            draw.text((0, 0), text[self.counter].upper(), font=self.font14, fill="black")
+            self._photoimage = ImageTk.PhotoImage(image)
+            self.model_image.config(image=self._photoimage)
         else:
             self.counter = 0
             self.highlight_input()
@@ -159,7 +160,7 @@ class Connection:
                 duty = 1
             if duty > 1:
                 duty = duty / 100
-            self.parent.update_frequency(freq, duty)
+            self.parent.update_frequency(freq, duty, self.model.upper())
         return f
 
     def connect(self):
