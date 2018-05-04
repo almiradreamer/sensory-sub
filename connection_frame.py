@@ -49,13 +49,14 @@ class Connection:
         :return:
         """
 
+        self.text_transfer.config(validate="focusout", validatecommand=self.reset_counter)
         self.text_transfer.delete(0, tk.END)
-        tk.Label(self.text_frame, text="Letters to send: ").grid(row=1)
+        tk.Label(self.text_frame, text="Letter to send: ").grid(row=1)
         self.text_transfer.grid(row=1, column=1)
         send_text_button = tk.Button(self.text_frame, text="Send", width=10, command=self.send_text())
-        send_text_button.grid(row=1, column=2, pady=20, padx=20)
-        # tk.Button(self.text_frame, text="<", width=2).grid(row=2, column=3)
-        # tk.Button(self.text_frame, text=">", width=2).grid(row=2, column=4)
+        send_text_button.grid(row=1, column=4, pady=20, padx=20)
+        tk.Button(self.text_frame, text="<", width=2, command=self.update_counter(-1)).grid(row=1, column=2)
+        tk.Button(self.text_frame, text=">", width=2, command=self.update_counter(1)).grid(row=1, column=3)
 
         available_serials = get_available_serials()
 
@@ -87,7 +88,8 @@ class Connection:
         :return:
         """
         def f():
-            text = self.text_transfer.get()
+            self.highlight_input()
+            text = self.text_transfer.get()[self.counter]
             width, height = self.font14.getsize(text)
             image = Image.new("RGBA", (width, height), color=(0, 0, 0, 0))
             draw = ImageDraw.Draw(image)
@@ -99,6 +101,49 @@ class Connection:
             tk.Label(self.model_frame, text="Preview: ").grid(row=0, column=0)
             print(self.model)
         return f
+
+    def update_counter(self, delta):
+        """Handle a walk through input string
+
+        Set new counter that indicates the current character to be sent
+
+        :param delta: the integer indicating how user wants to change the focus character
+        :return:
+        """
+        def f():
+            text = self.text_transfer.get()
+            counter = self.counter + delta
+            if len(text) > 0:
+                if 0 <= counter < len(text):
+                    self.counter = counter
+                    self.highlight_input()
+                else:
+                    self.counter = 0
+                    self.highlight_input()
+        return f
+
+    def reset_counter(self):
+        """Reset counter that indicates the current character to be sent
+
+        :return:
+        """
+        self.counter = 0
+        self.highlight_input()
+
+    def highlight_input(self):
+        """Highlight the focus character in the input string
+
+        :return:
+        """
+        text = self.text_transfer.get()
+        if 0 <= self.counter < len(text):
+            text = text.lower()
+            text = text[:self.counter] + text[self.counter].upper() + text[self.counter + 1:]
+            self.text_transfer.delete(0, tk.END)
+            self.text_transfer.insert(0, text)
+        else:
+            self.counter = 0
+            self.highlight_input()
 
     def set_frequency(self):
         """Handle a new electrical parameters submitted by a user
