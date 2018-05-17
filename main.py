@@ -7,6 +7,7 @@ and manages data exchange between controller and program interface.
 import tkinter as tk
 import connection_frame  as connection_frame
 import time
+import pickle
 
 
 class Main:
@@ -217,6 +218,10 @@ class Main:
         """
         msg = "f" + str(freq) + "d" + str(duty) + "m" + str(self.alphabet[ord(model)])
         self.serial.write(msg.encode("utf-8"))
+        afile = open(r'params.pkl', 'wb')
+        pickle.dump(freq, afile)
+        pickle.dump(duty, afile)
+        afile.close()
 
 
     def select(self, i):

@@ -6,6 +6,7 @@ This script draws application interface and manages user manipulations with it.
 import tkinter as tk
 import subprocess
 import serial
+import pickle
 from PIL import Image, ImageFont, ImageDraw, ImageTk
 
 
@@ -78,6 +79,14 @@ class Connection:
         self.duty_edit.grid(row=2, column=1)
         change_freq_button = tk.Button(self.electric_frame, text="Set", width=10, command=self.set_frequency(), padx=10)
         change_freq_button.grid(column=2)
+        file = open(r'params.pkl', 'rb')
+        freq = pickle.load(file)
+        duty = pickle.load(file)
+        print ("freq is ", freq)
+        print ("duty is ", duty)
+        self.freq_edit.insert(0, freq)
+        self.duty_edit.insert(0, duty)
+        file.close()
 
     def send_text(self):
         """Handle a text submitted by a user
